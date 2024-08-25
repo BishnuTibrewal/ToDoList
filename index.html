@@ -114,44 +114,89 @@
         <tbody id="tableBody"></tbody>
       </table>
     </div>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
       crossorigin="anonymous"
     ></script>
+
     <script>
-      let add;
-      function update() {
+      function updateList(itemJSONArray, editIndex){
+        let tableBody = document.getElementById("tableBody");
+        let str = "";
+        itemJSONArray.forEach((element, index) => {
+          if(index==editIndex){
+            str += `
+                    <tr>
+                        <th scope="row">${index + 1}</th>
+                        <td><input class='editTitle' /></td>
+                        <td><input class='editDescription' /></td>
+                        <td><button class="btn btn-primary"  onclick="saveEdit(${index})">Save</button></td>
+                        <td><button class="btn btn-primary"  onclick="deleteTask(${index})">Delete</button></td>
+                        </tr>`;
+
+          }
+          else{
+          str += `
+                    <tr>
+                        <th scope="row">${index + 1}</th>
+                        <td>${element.title}</td>
+                        <td>${element.description}</td>
+                        <td><button class="btn btn-primary"  onclick="editTask(${index})">Edit</button></td>
+                        <td><button class="btn btn-primary"  onclick="deleteTask(${index})">Delete</button></td>
+                        </tr>`;}
+        });
+        tableBody.innerHTML = str;
+      }
+
+
+      function addTask() {
         console.log("button clicked");
         let title = document.getElementById("title").value;
         let description = document.getElementById("Description").value;
         if (localStorage.getItem("itemsJSON") == null) {
           itemJSONArray = [];
-          itemJSONArray.push([title, description]);
+          itemJSONArray.push({title, description});
           localStorage.setItem("itemsJSON", JSON.stringify(itemJSONArray));
         } else {
           itemJSONArrayStr = localStorage.getItem("itemsJSON");
           itemJSONArray = JSON.parse(itemJSONArrayStr);
-          itemJSONArray.push([title, description]);
+          itemJSONArray.push({title, description});
           localStorage.setItem("itemsJSON", JSON.stringify(itemJSONArray));
         }
-
-        let tableBody = document.getElementById("tableBody");
-        let str = "";
-        itemJSONArray.forEach((element, index) => {
-          str += `
-                    <tr>
-                        <th scope="row">${index + 1}</th>
-                        <td>${element[0]}</td>
-                        <td>${element[1]}</td>
-                        </tr>`;
-        });
-        tableBody.innerHTML = str;
+        updateList(itemJSONArray)
         document.getElementById("Description").value = null;
         document.getElementById("title").value = null;
       }
+
+      const deleteTask=(index)=>{
+        itemJSONArrayStr = localStorage.getItem("itemsJSON");
+          itemJSONArray = JSON.parse(itemJSONArrayStr)
+          itemJSONArray.splice(index, 1)
+          localStorage.setItem("itemsJSON", JSON.stringify(itemJSONArray));
+          updateList(itemJSONArray)
+      }
+
+      const editTask=(index)=>{
+        itemJSONArrayStr = localStorage.getItem("itemsJSON");
+          itemJSONArray = JSON.parse(itemJSONArrayStr)
+          console.log(itemJSONArray)
+          updateList(itemJSONArray,index)
+      }
+
+      const saveEdit=(index)=>{
+        let title = document.getElementsByClassName("editTitle")[0].value;
+        let description = document.getElementsByClassName("editDescription")[0].value;
+        itemJSONArrayStr = localStorage.getItem("itemsJSON");
+          itemJSONArray = JSON.parse(itemJSONArrayStr)
+          itemJSONArray.splice(index,1,{title, description})
+          updateList(itemJSONArray)
+      }
+
+      let add;
       add = document.getElementById("add");
-      add.addEventListener("click", update);
+      add.addEventListener("click", addTask);
       localStorage.clear(); //to refresh the list everytime the page refreshes
     </script>
   </body>
